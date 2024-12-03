@@ -1,165 +1,27 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/db/dbConnect"; // Ensure you have a database connection utility
 import Department from "@/models/department"; // Import your Department model
-import Winner  from "@/models/winner"; // Import your Department model
-
-
-
 
 
 export async function GET() {
-  try {
-    // Connect to the database
-    await dbConnect();
-
-    // Fetch all departments and winners
-    const departments = await Department.find();
-    const winners = await Winner.find();
-
-    // Initialize a Map to store department points, starting with 0 points for all departments
-    const departmentPoints = new Map();
-    
-    // Initialize points to 0 for all departments
-    for (const department of departments) {
-      departmentPoints.set(department.name, 0);
-    }
-
-    // Calculate points for each department based on winners
-    for (const winner of winners) {
-      const departmentName = winner.department;
-      const place = winner.place.toLowerCase();
-
-      // Determine points for the place
-      const points = place === 'first' ? 5 : 3;
-
-      // Add points to the department
-      if (departmentPoints.has(departmentName)) {
-        departmentPoints.set(departmentName, departmentPoints.get(departmentName) + points);
-      }
-    }
-
-    // Update departments with the calculated points
-    for (const [departmentName, points] of departmentPoints.entries()) {
-      const department = await Department.findOne({ name: departmentName });
-      if (department) {
-        department.point = points;
-        await department.save();
-      }
-    }
-    
-
-    const updatedDepartments = await Department.find();
-    console.log(updatedDepartments);
-    return NextResponse.json(updatedDepartments, { status: 200 });
-  } catch (error: any) {
-    // Handle errors
-    console.error("Error calculating points:", error);
-    return NextResponse.json(
-      { message: "Server error", error: error.message },
-      { status: 500 }
-    );
-  }
-}
-
-
-// export async function GET() {
-//   try {
- 
-//     await dbConnect();
-
-
-//     const departments = await Department.find();
-//     const winners = await Winner.find();
-
-//     const departmentPoints = new Map();
-
+    try {
+      // Connect to the database
+      await dbConnect();
   
-//     for (const winner of winners) {
-//       const departmentName = winner.department;
-//       const place = winner.place.toLowerCase();
-
-//       // Determine points for the place
-//       const points = place === 'first' ? 5 : 3;
-
-//       // Add points to the department
-//       if (departmentPoints.has(departmentName)) {
-//         departmentPoints.set(departmentName, departmentPoints.get(departmentName) + points);
-//       } else {
-//         departmentPoints.set(departmentName, points);
-//       }
-//     }
-
-//     // Update departments with the calculated points
-//     for (const [departmentName, points] of departmentPoints.entries()) {
-//       const department = await Department.findOne({ name: departmentName });
-//       if (department) {
-//         department.point = points;
-//         await department.save();
-//       }
-//     }
-
- 
-//     const updatedDepartments = await Department.find();
-//     return NextResponse.json(updatedDepartments, { status: 200 });
-//   } catch (error: any) {
-//     // Handle errors
-//     console.error("Error calculating points:", error);
-//     return NextResponse.json(
-//       { message: "Server error", error: error.message },
-//       { status: 500 }
-//     );
-//   }
-// }
-
-// export async function GET() {
-//   try {
-//     // Connect to the database
-//     await dbConnect();
-
-//     // Fetch all departments and winners
-//     const departments = await Department.find();
-//     const winners = await Winner.find();
-
-//     // Create a map to store updated points for each department
-//     const departmentPoints = new Map();
-
-//     // Loop through winners to calculate points
-//     for (const winner of winners) {
-//       const departmentName = winner.department;
-//       const place = winner.place.toLowerCase();
-
-//       // Determine points for the place
-//       const points = place === 'first' ? 5 : 3;
-
-//       // Add points to the department
-//       if (departmentPoints.has(departmentName)) {
-//         departmentPoints.set(departmentName, departmentPoints.get(departmentName) + points);
-//       } else {
-//         departmentPoints.set(departmentName, points);
-//       }
-//     }
-
-//     // Update departments with the calculated points
-//     for (const [departmentName, points] of departmentPoints.entries()) {
-//       const department = await Department.findOne({ name: departmentName });
-//       if (department) {
-//         department.point = points;
-//         await department.save();
-//       }
-//     }
-
- 
-//     const updatedDepartments = await Department.find();
-//     return NextResponse.json(departmentPoints, { status: 200 });
-//   } catch (error: any) {
-//     // Handle errors
-//     console.error("Error calculating points:", error);
-//     return NextResponse.json(
-//       { message: "Server error", error: error.message },
-//       { status: 500 }
-//     );
-//   }
-// }
+      // Fetch all departments from the database
+      const departments = await Department.find();
+  
+      // Return the list of departments as JSON
+      return NextResponse.json(departments, { status: 200 });
+    } catch (error: any) {
+      // Handle errors
+      console.error("Error fetching departments:", error);
+      return NextResponse.json(
+        { message: "Server error", error: error.message },
+        { status: 500 }
+      );
+    }
+  }
 
   
   export async function POST(req: Request) {
@@ -266,6 +128,5 @@ export async function GET() {
 //     );
 //   }
 // }
-
 
 
