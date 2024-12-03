@@ -21,7 +21,7 @@ const Navbar = () => {
               />
             </a>
             <h1 className="font-bold text-xl text-center">
-              Srinivas Institution of Technology
+              Srinivas Institute of Technology
             </h1>
           </div>
         </nav>
