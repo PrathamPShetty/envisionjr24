@@ -4,6 +4,7 @@ interface DatasetItem {
   name: string;
   imgpath: string;
   point: number;
+  event:number;
   isMax?: boolean;
 }
 
@@ -44,7 +45,7 @@ export default function Leaderboard() {
 
     const interval = setInterval(() => {
       fetchDataAndSet();
-    }, 20000);
+    }, 200000);
 
     return () => clearInterval(interval);
   }, []);
@@ -76,7 +77,7 @@ export default function Leaderboard() {
               </td>
               <td className="name">{entry.name}</td>
               <td className="points">
-                {entry.point}
+              <strong>Point :   </strong>{entry.point}
                 {/* {index === 0 && (
                   <img
                     className="gold-medal"
@@ -85,6 +86,9 @@ export default function Leaderboard() {
                     style={{ width: '20px', marginLeft: '10px' }}
                   />
                 )} */}
+              </td>
+              <td className="points">
+              <strong>Events : </strong>  {entry.event}
               </td>
             </tr>
           ))}
@@ -130,7 +134,7 @@ export default function Leaderboard() {
 
         #leaderboard {
           width: 100%;
-          max-width: 45rem;
+          max-width: 50rem;
           position: relative;
           padding: 1rem;
           background-color: #ffffff;
