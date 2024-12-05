@@ -155,7 +155,7 @@ export default function Leaderboard() {
 
         @media (max-width: 480px) {
           #leaderboard {
-            margin-left: 8px;
+            margin: 2px;
             padding: 0.5rem;
           }
         }
