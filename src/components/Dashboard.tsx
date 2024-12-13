@@ -14,6 +14,8 @@ export default function Dashboard() {
   const [filteredColleges, setFilteredColleges] = useState<College[]>([]);
   const [error, setError] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [editData, setEditData] = useState<{ point: number }>({ point: 0 });
+    const [editingCollege, setEditingCollege] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -21,8 +23,15 @@ export default function Dashboard() {
     const fetchColleges = async () => {
       try {
         const response = await axios.get("/api/v1/college");
-        setColleges(response.data);
-        setFilteredColleges(response.data); // Initialize with all colleges
+        setColleges(response.data.map((college: any) => ({
+            id: college._id,
+            name: college.name,
+            point: college.point,
+            })));
+        console.log(response.data);
+
+        setFilteredColleges(colleges);
+
       } catch (error) {
         console.error("Error fetching colleges:", error);
         setError("Failed to fetch colleges. Please try again.");
@@ -92,6 +101,12 @@ export default function Dashboard() {
     router.push("/admin/addcollege");
   };
 
+
+  const handleEdit = (id: string) => {
+    setEditingCollege(id);
+    setEditData({ point: colleges.find((college) => college.id === id)?.point || 0 });
+
+  }
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-100">
       <h1 className="text-3xl font-bold mb-6 text-center">Colleges</h1>
@@ -128,7 +143,7 @@ export default function Dashboard() {
           </thead>
           <tbody>
             {filteredColleges.map((college, index) => (
-              <tr key={college.id} className="border-b">
+              <tr key={index} className="border-b">
                 <td className="py-3 px-6">{index + 1}</td>
                 <td className="py-3 px-6">{college.name}</td>
                 <td className="py-3 px-6">
@@ -156,7 +171,7 @@ export default function Dashboard() {
                 <td className="py-3 px-6">
                   <div className="flex gap-4">
                     <button
-                      onClick={() => handleEdit(college.id, college.point)}
+                      onClick={ ()=>handleEdit(college.id)}
                       className="bg-teal-500 text-white px-6 py-2 rounded hover:bg-teal-700"
                     >
                       Edit
