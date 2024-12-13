@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
 
 // Define the structure of a college object
 interface College {
@@ -12,16 +12,11 @@ interface College {
 export default function Dashboard() {
   const [colleges, setColleges] = useState<College[]>([]);
   const [filteredColleges, setFilteredColleges] = useState<College[]>([]);
-  const [formData, setFormData] = useState<{ point: number }>({ point: 0 });
-  const [editData, setEditData] = useState<{ point: number }>({ point: 0 });
   const [error, setError] = useState<string>("");
-  const [editingCollege, setEditingCollege] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const storedUsername = sessionStorage.getItem("username");
-  const router = useRouter(); // Initialize the router
+  const router = useRouter();
 
-  // Fetch colleges on component mount
   useEffect(() => {
     const fetchColleges = async () => {
       try {
@@ -37,7 +32,6 @@ export default function Dashboard() {
     fetchColleges();
   }, []);
 
-  // Filter colleges by search query
   useEffect(() => {
     if (searchQuery === "") {
       setFilteredColleges(colleges); // If no search query, show all colleges
@@ -50,7 +44,6 @@ export default function Dashboard() {
     }
   }, [searchQuery, colleges]);
 
-  // Handle the delete action
   const handleDelete = async (id: string) => {
     try {
       await axios.delete(`/api/v1/college/${id}`);
@@ -62,18 +55,13 @@ export default function Dashboard() {
     }
   };
 
-  // Handle the edit action
-  const handleEdit = (id: string, point: number) => {
-    setEditingCollege(id);
-    setEditData({ point }); // Correctly set the point when editing
-  };
 
-  // Handle the update action
+
   const handleUpdate = async (id: string) => {
     if (editingCollege === id) {
       try {
         const response = await axios.put(`/api/v1/college/${id}`, {
-          points: editData.point, // Correctly use editData.point for the update
+          points: editData.point,
         });
 
         setColleges(
@@ -87,7 +75,7 @@ export default function Dashboard() {
           )
         );
         setEditingCollege(null);
-        setEditData({ point: 0 }); // Clear edit state after update
+        setEditData({ point: 0 });
       } catch (error) {
         console.error("Error updating college:", error);
         setError("Failed to update college. Please try again.");
@@ -95,18 +83,13 @@ export default function Dashboard() {
     }
   };
 
-  // Handle form input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, id: number) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
-    setEditData({
-      ...editData,
-      id: Number(value),
-    });
+    setEditData({ ...editData, point: Number(value) });
   };
 
-  // Navigate to the Add College page
   const handleNavigateToAddCollege = () => {
-    router.push("/admin/addcollege"); // Navigate to the Add College page
+    router.push("/admin/addcollege");
   };
 
   return (
@@ -153,9 +136,8 @@ export default function Dashboard() {
                     <form className="flex items-center">
                       <input
                         type="number"
-                        id="point"
                         value={editData.point}
-                        onChange={(e)=>handleInputChange(e,college.id)}
+                        onChange={handleInputChange}
                         placeholder="Enter points"
                         className="bg-transparent border border-gray-300 text-gray-700 py-2 px-3 w-28 focus:outline-none"
                       />

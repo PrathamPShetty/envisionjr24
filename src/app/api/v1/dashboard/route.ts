@@ -9,7 +9,7 @@ export async function GET() {
     await dbConnect();
 
    
-    const winners = await College.find({}).sort({ point: 1 }); 
+    const winners = await College.find({}).sort({ point: -1 }); 
 
     return NextResponse.json(winners, { status: 200 });
   } catch (error) {
