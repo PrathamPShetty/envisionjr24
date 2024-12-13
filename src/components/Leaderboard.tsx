@@ -57,11 +57,12 @@ export default function Leaderboard() {
     <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f4f4f4', padding: '10px' }}>
       <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
         <div style={{ flex: '0 0 10%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img src="/path-to-logo1.png" alt="Logo 1" style={{ maxWidth: '100%', height: 'auto' }} />
+          <img src="/logo1.png" alt="Logo 1" style={{ maxWidth: '30%', height: 'auto' }} />
         </div>
         <h1 style={{ flexGrow: 1, textAlign: 'center', fontSize: '24px', fontWeight: 'bold' }}>Srinivas Institute Of Technology</h1>
+        <h1 style={{ flexGrow: 1, textAlign: 'center', fontSize: '24px', fontWeight: 'bold' }}>Envision Junior 2k24</h1>
         <div style={{ flex: '0 0 10%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img src="/path-to-logo2.png" alt="Logo 2" style={{ maxWidth: '100%', height: 'auto' }} />
+          <img src="/logo2.jpg" alt="Logo 2" style={{ maxWidth: '30%', height: 'auto' }} />
         </div>
       </div>
     </header>
