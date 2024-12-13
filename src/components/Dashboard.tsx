@@ -100,7 +100,7 @@ export default function Dashboard() {
     const { value } = e.target;
     setEditData({
       ...editData,
-      point: Number(value),
+      id: Number(value),
     });
   };
 
