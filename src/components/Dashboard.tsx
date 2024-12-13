@@ -12,8 +12,8 @@ interface College {
 export default function Dashboard() {
   const [colleges, setColleges] = useState<College[]>([]);
   const [filteredColleges, setFilteredColleges] = useState<College[]>([]);
-  const [formData, setFormData] = useState<{ point: number }>();
-  const [editData, setEditData] = useState<{ point: number }>();
+  const [formData, setFormData] = useState<{ point: number }>({ point: 0 });
+  const [editData, setEditData] = useState<{ point: number }>({ point: 0 });
   const [error, setError] = useState<string>("");
   const [editingCollege, setEditingCollege] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -63,9 +63,9 @@ export default function Dashboard() {
   };
 
   // Handle the edit action
-  const handleEdit = (id: string, name: string, point: number) => {
+  const handleEdit = (id: string, point: number) => {
     setEditingCollege(id);
-    setFormData({ point });
+    setEditData({ point }); // Correctly set the point when editing
   };
 
   // Handle the update action
@@ -73,7 +73,7 @@ export default function Dashboard() {
     if (editingCollege === id) {
       try {
         const response = await axios.put(`/api/v1/college/${id}`, {
-          points: setEditData.point,
+          points: editData.point, // Correctly use editData.point for the update
         });
 
         setColleges(
@@ -87,7 +87,7 @@ export default function Dashboard() {
           )
         );
         setEditingCollege(null);
-        setFormData();
+        setEditData({ point: 0 }); // Clear edit state after update
       } catch (error) {
         console.error("Error updating college:", error);
         setError("Failed to update college. Please try again.");
@@ -98,8 +98,8 @@ export default function Dashboard() {
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
-    setFormData({
-      ...formData,
+    setEditData({
+      ...editData,
       point: Number(value),
     });
   };
@@ -124,7 +124,6 @@ export default function Dashboard() {
         />
       </div>
 
-   
       <div className="mb-6 w-full max-w-xs">
         <button
           onClick={handleNavigateToAddCollege}
@@ -155,7 +154,7 @@ export default function Dashboard() {
                       <input
                         type="number"
                         id="point"
-                        value={setEditData.point}
+                        value={editData.point}
                         onChange={handleInputChange}
                         placeholder="Enter points"
                         className="bg-transparent border border-gray-300 text-gray-700 py-2 px-3 w-28 focus:outline-none"
@@ -175,7 +174,7 @@ export default function Dashboard() {
                 <td className="py-3 px-6">
                   <div className="flex gap-4">
                     <button
-                      onClick={() => handleEdit(college.id, college.name, college.point)}
+                      onClick={() => handleEdit(college.id, college.point)}
                       className="bg-teal-500 text-white px-6 py-2 rounded hover:bg-teal-700"
                     >
                       Edit
