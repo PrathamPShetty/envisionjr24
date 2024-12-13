@@ -125,7 +125,7 @@ export default function Leaderboard() {
                     fontWeight: 'bold',
                   }}
                 >
-                  Marks
+                  Points
                 </th>
               </tr>
             </thead>
