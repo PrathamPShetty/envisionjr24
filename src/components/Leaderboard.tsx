@@ -4,7 +4,6 @@ interface DatasetItem {
   name: string;
   imgpath: string;
   point: number;
-  event:number;
   isMax?: boolean;
 }
 
@@ -15,7 +14,7 @@ export default function Leaderboard() {
   // Function to fetch department data
   const fetchDepartments = async () => {
     try {
-      const response = await fetch('/api/v1/department'); // Assuming the GET endpoint is /api/departments
+      const response = await fetch('/api/v1/college'); // Assuming the GET endpoint is /api/departments
       const data = await response.json();
       if (Array.isArray(data)) {
         return data;
@@ -87,9 +86,7 @@ export default function Leaderboard() {
                   />
                 )} */}
               </td>
-              <td className="points">
-              <strong>Events : </strong>  {entry.event}
-              </td>
+          
             </tr>
           ))}
         </tbody>

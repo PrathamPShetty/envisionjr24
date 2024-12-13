@@ -1,481 +1,139 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-interface Participant {
+// Define the structure of a college object
+interface College {
   id: string;
   name: string;
-  department: string;
-  semester: string;
-  event: string;
-  place: string;
-}
-
-interface Department {
-  id: string;
-  name: string;
+  point: number;
 }
 
 export default function Dashboard() {
-  const [formData, setFormData] = useState({
-    username: "",
-    name: "",
-    department: "",
-    semester: "",
-    event: "",
-    place: "",
-  });
+  const [colleges, setColleges] = useState<College[]>([]);
+  const [formData, setFormData] = useState({ college: "", point: 0 });
+  const [error, setError] = useState<string>("");
+  const [editingCollege, setEditingCollege] = useState<string | null>(null);
+
   const storedUsername = sessionStorage.getItem("username");
-  const [participants, setParticipants] = useState<Participant[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
 
+  // Fetch colleges on component mount
   useEffect(() => {
-    const username = sessionStorage.getItem("username");
-    if (username) {
-      setFormData((prevData) => ({ ...prevData, username }));
-    }
-  }, []);
-
-  useEffect(() => {
-    // Fetch participants
-    const fetchParticipants = async () => {
-      if (!storedUsername) {
-        console.error("Username is missing in session storage");
-        return;
-      }
+    const fetchColleges = async () => {
       try {
-        const response = await axios.get(`/api/v1/dashboard/${storedUsername}`);
-        if (response.status === 200) {
-          setParticipants(response.data);
-        } else {
-          console.error("Error fetching participants:", response.data);
-        }
+        const response = await axios.get("/api/v1/college");
+        setColleges(response.data);
       } catch (error) {
-        console.error("Network error:", error);
+        console.error("Error fetching colleges:", error);
+        setError("Failed to fetch colleges. Please try again.");
       }
     };
 
-    fetchParticipants();
-  }, [storedUsername]);
-
-  useEffect(() => {
-    // Fetch departments
-    const fetchDepartments = async () => {
-      try {
-        const response = await axios.get(`/api/v1/department`);
-        if (response.status === 200) {
-          setDepartments(response.data);
-          console.log(response.data);
-        } else {
-          console.error("Error fetching departments:", response.data);
-        }
-      } catch (error) {
-        console.error("Network error:", error);
-      }
-    };
-
-    fetchDepartments();
+    fetchColleges();
   }, []);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { id, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [id]: value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.username) {
-      alert("Username is required");
-      return;
-    }
-
-    try {
-      const response = await axios.post("/api/v1/dashboard", formData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.status === 200) {
-        setParticipants([...participants, response.data]);
-        setFormData({
-          username: formData.username,
-          name: "",
-          department: "",
-          semester: "",
-          event: "",
-          place: "",
-        });
-        console.log("Participant added successfully:", response.data);
-      } else {
-        console.error("Error adding participant:", response.data.message);
-      }
-    } catch (error) {
-      console.error("Network error:", error);
-    }
-  };
-
+  // Handle the delete action
   const handleDelete = async (id: string) => {
     try {
-      const response = await axios.delete(`/api/v1/dashboard/${id}`);
-      if (response.status === 200) {
-        setParticipants(participants.filter((p) => p.id !== id));
-        console.log("Participant deleted successfully");
-      } else {
-        console.error("Error deleting participant:", response.data);
-      }
+      await axios.delete(`/api/v1/college/${id}`);
+      setColleges(colleges.filter((college) => college.id !== id));
     } catch (error) {
-      console.error("Network error:", error);
+      console.error("Error deleting college:", error);
+      setError("Failed to delete college. Please try again.");
     }
   };
 
-  const handleUpdate = async (id: string, updatedData: Participant) => {
-    try {
-      const response = await axios.put(`/api/v1/dashboard/${id}`, updatedData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+  // Handle the edit action
+  const handleEdit = (id: string, name: string, point: number) => {
+    setEditingCollege(id);
+    setFormData({ college: name, point }); // Populate form with college's current point
+  };
 
-      if (response.status === 200) {
-        setParticipants(
-          participants.map((p) =>
-            p.id === id ? { ...p, ...updatedData } : p
+  // Handle the update action
+  const handleUpdate = async (id: string) => {
+    if (editingCollege === id) {
+      try {
+        const response = await axios.put(`/api/v1/college/${id}`, {
+          points: formData.point,
+        });
+
+        setColleges(
+          colleges.map((college) =>
+            college.id === id ? { ...college, point: response.data.points } : college
           )
         );
-        console.log("Participant updated successfully");
-      } else {
-        console.error("Error updating participant:", response.data);
+        setEditingCollege(null); // Clear the editing state after update
+        setFormData({ college: "", point: 0 }); // Reset form data
+      } catch (error) {
+        console.error("Error updating college:", error);
+        setError("Failed to update college. Please try again.");
       }
-    } catch (error) {
-      console.error("Network error:", error);
     }
   };
+
+  // Handle form input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData({
+      ...formData,
+      [id]: id === "point" ? Number(value) : value, // Convert point to number
+    });
+  };
+
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        background: "#ffffff",
-        fontFamily: "'Poppins', sans-serif",
-      }}
-    >
-      <div
-        style={{
-          background: "#fff",
-          borderRadius: "20px",
-          padding: "20px",
-          boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.2)",
-          maxWidth: "800px",
-          width: "100%",
-          animation: "fadeIn 1s ease-in-out",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "2rem",
-            textAlign: "center",
-            marginBottom: "20px",
-            color: "#34495e",
-          }}
-        >
-          🎉 Event Dashboard
-        </h1>
-        <form onSubmit={handleSubmit}>
-          <label
-            htmlFor="name"
-            style={{
-              fontWeight: "bold",
-              marginBottom: "5px",
-              display: "block",
-              color: "#2c3e50",
-            }}
-          >
-            Participant Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            placeholder="Enter participant name"
-            required
-            style={{
-              width: "100%",
-              padding: "10px",
-              marginBottom: "15px",
-              borderRadius: "10px",
-              border: "1px solid #ccc",
-              outline: "none",
-              transition: "all 0.3s ease-in-out",
-            }}
-          />
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-100">
+      <h1 className="text-3xl font-bold mb-6 text-center">Colleges</h1>
 
-    
-         
+      <div className="w-full max-w-3xl">
+        {colleges.map((college) => (
+          <div key={college.id} className="bg-white p-4 mb-4 rounded shadow-md">
+            <h2 className="text-2xl font-semibold">{college.name}</h2>
 
-
-
-
-          <label htmlFor="department"   style={{
-              fontWeight: "bold",
-              marginBottom: "5px",
-              display: "block",
-              color: "#2c3e50",
-            }}>Select Department</label>
-          <select
-            id="department"
-            value={formData.department}
-            onChange={handleInputChange}
-            style={{
-              width: "100%",
-              padding: "10px",
-              marginBottom: "15px",
-              borderRadius: "10px",
-              border: "1px solid #ccc",
-              outline: "none",
-              transition: "all 0.3s ease-in-out",
-            }}
-          >
-            <option value="">Choose department</option>
-            {departments.map((department) => (
-              <option key={department.id} value={department.id}>
-                {department.name}
-              </option>
-            ))}
-          </select>
-
-          <label htmlFor="semester"    style={{
-              fontWeight: "bold",
-              marginBottom: "5px",
-              display: "block",
-              color: "#2c3e50",
-            }}>Select Semester</label>
-          <select
-            id="semester"
-            value={formData.semester}
-            onChange={handleInputChange}
-            style={{
-              width: "100%",
-              padding: "10px",
-              marginBottom: "15px",
-              borderRadius: "10px",
-              border: "1px solid #ccc",
-              outline: "none",
-              transition: "all 0.3s ease-in-out",
-            }}
-          >
-            <option value="">Choose a semester</option>
-            {Array.from({ length: 8 }, (_, i) => (
-              <option key={i + 1} value={`Semester ${i + 1}`}>
-                Semester {i + 1}
-              </option>
-            ))}
-          </select>
-
-          <label
-            htmlFor="name"
-            style={{
-              fontWeight: "bold",
-              marginBottom: "5px",
-              display: "block",
-              color: "#2c3e50",
-            }}
-          >
-            Event
-          </label>
-          <input
-            type="text"
-            id="event"
-            value={formData.event}
-            onChange={handleInputChange}
-            placeholder="Enter event name"
-            required
-            style={{
-              width: "100%",
-              padding: "10px",
-              marginBottom: "15px",
-              borderRadius: "10px",
-              border: "1px solid #ccc",
-              outline: "none",
-              transition: "all 0.3s ease-in-out",
-            }}
-          />
-
-          <label
-            htmlFor="place"
-            style={{
-              fontWeight: "bold",
-              marginBottom: "5px",
-              display: "block",
-              color: "#2c3e50",
-            }}
-          >
-            Select Place
-          </label>
-          <select
-            id="place"
-            value={formData.place}
-            onChange={handleInputChange}
-            style={{
-              width: "100%",
-              padding: "10px",
-              marginBottom: "15px",
-              borderRadius: "10px",
-              border: "1px solid #ccc",
-              outline: "none",
-              transition: "all 0.3s ease-in-out",
-            }}
-          >
-            <option value="">Choose a place</option>
-            <option value="First">First</option>
-            <option value="Second">Second</option>
-          </select>
-
-          <button
-            type="submit"
-            style={{
-              padding: "10px 20px",
-              background: "#16a085",
-              color: "#fff",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-              width: "100%",
-            }}
-          >
-            Add Participant
-          </button>
-        </form>
-
-        <h2
-          style={{
-            fontSize: "1.5rem",
-            marginTop: "40px",
-            marginBottom: "20px",
-            textAlign: "center",
-            color: "#34495e",
-          }}
-        >
-          Participants List
-        </h2>
-
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            marginBottom: "20px",
-          }}
-        >
-          <thead>
-            <tr>
-              <th
-                style={{
-                  padding: "10px",
-                  borderBottom: "1px solid #ddd",
-                  textAlign: "left",
-                }}
-              >
-                Name
-              </th>
-              <th
-                style={{
-                  padding: "10px",
-                  borderBottom: "1px solid #ddd",
-                  textAlign: "left",
-                }}
-              >
-                Department
-              </th>
-              <th
-                style={{
-                  padding: "10px",
-                  borderBottom: "1px solid #ddd",
-                  textAlign: "left",
-                }}
-              >
-                Semester
-              </th>
-              <th
-                style={{
-                  padding: "10px",
-                  borderBottom: "1px solid #ddd",
-                  textAlign: "left",
-                }}
-              >
-                Event
-              </th>
-              <th
-                style={{
-                  padding: "10px",
-                  borderBottom: "1px solid #ddd",
-                  textAlign: "left",
-                }}
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {participants.map((participant) => (
-              <tr key={participant.id}>
-                <td style={{ padding: "10px", borderBottom: "1px solid #ddd" }}>
-                  {participant.name}
-                </td>
-                <td style={{ padding: "10px", borderBottom: "1px solid #ddd" }}>
-                  {participant.department}
-                </td>
-                <td style={{ padding: "10px", borderBottom: "1px solid #ddd" }}>
-                  {participant.semester}
-                </td>
-                <td style={{ padding: "10px", borderBottom: "1px solid #ddd" }}>
-                  {participant.event}
-                </td>
-                <td style={{ padding: "10px", borderBottom: "1px solid #ddd" }}>
+            {/* Display input for only the college being edited */}
+            {editingCollege === college.id ? (
+              <form className="mt-4">
+                <div className="flex items-center border-b-2 border-teal-500 py-2">
+                  <input
+                    type="number"
+                    id="point"
+                    value={formData.point}
+                    onChange={handleInputChange}
+                    placeholder="Enter points"
+                    className="bg-transparent border-none text-gray-700 py-1 px-2 w-full focus:outline-none"
+                  />
                   <button
-                    onClick={() =>
-                      handleUpdate(participant.id, {
-                        ...participant,
-                        name: "Updated Name", 
-                      })
-                    }
-                    style={{
-                      padding: "5px 10px",
-                      background: "#16a085",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "5px",
-                      cursor: "pointer",
-                    }}
+                    type="button"
+                    onClick={() => handleUpdate(college.id)}
+                    className="bg-teal-500 text-white px-4 py-2 rounded ml-4 hover:bg-teal-700"
+                  >
+                    Update
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="mt-4">
+                <span className="text-lg">Points: {college.point}</span>
+                <div className="flex mt-2 gap-3">
+                  <button
+                    onClick={() => handleEdit(college.id, college.name, college.point)}
+                    className="bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-700"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(participant.id)}
-                    style={{
-                      padding: "5px 10px",
-                      background: "#e74c3c",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "5px",
-                      cursor: "pointer",
-                      marginLeft: "10px",
-                    }}
+                    onClick={() => handleDelete(college.id)}
+                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
                   >
                     Delete
                   </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
+
+  
+      {error && <p className="mt-4 text-red-500 text-center">{error}</p>}
     </div>
   );
 }

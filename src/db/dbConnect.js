@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI =  "mongodb+srv://emergency:emergency@prathampshetty99sai.j4iophu.mongodb.net/altius?retryWrites=true&w=majority";
+const MONGODB_URI =  "mongodb+srv://emergency:emergency@prathampshetty99sai.j4iophu.mongodb.net/envisionjr24?retryWrites=true&w=majority";
 
 if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable in .env.local');
