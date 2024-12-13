@@ -96,7 +96,7 @@ export default function Dashboard() {
   };
 
   // Handle form input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, id: number) => {
     const { value } = e.target;
     setEditData({
       ...editData,
@@ -155,7 +155,7 @@ export default function Dashboard() {
                         type="number"
                         id="point"
                         value={editData.point}
-                        onChange={handleInputChange}
+                        onChange={(e)=>handleInputChange(e,college.id)}
                         placeholder="Enter points"
                         className="bg-transparent border border-gray-300 text-gray-700 py-2 px-3 w-28 focus:outline-none"
                       />
