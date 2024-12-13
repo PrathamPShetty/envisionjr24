@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState} from "react";
 import axios from "axios";
 
 // Define the structure of a college object
@@ -15,7 +15,6 @@ export default function AddCollege() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
-  const storedUsername = sessionStorage.getItem("username");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -24,10 +23,7 @@ export default function AddCollege() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!storedUsername) {
-      setError("You must be logged in to submit data.");
-      return;
-    }
+  
 
     setLoading(true);
     try {
